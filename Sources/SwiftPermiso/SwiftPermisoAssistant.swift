@@ -19,6 +19,10 @@ public final class SwiftPermisoAssistant {
         hostApp: SwiftPermisoHostApp = .current(),
         sourceFrameInScreen: CGRect? = nil
     ) {
+        if overlayController != nil, pendingPanels == [panel] {
+            NSWorkspace.shared.open(panel.settingsURL)
+            return
+        }
         pendingPanels = [panel]
         presentCurrent(hostApp: hostApp, sourceFrameInScreen: sourceFrameInScreen)
     }
@@ -28,6 +32,10 @@ public final class SwiftPermisoAssistant {
         hostApp: SwiftPermisoHostApp = .current(),
         sourceFrameInScreen: CGRect? = nil
     ) {
+        if overlayController != nil, pendingPanels == panels, let panel = pendingPanels.first {
+            NSWorkspace.shared.open(panel.settingsURL)
+            return
+        }
         pendingPanels = panels
         presentCurrent(hostApp: hostApp, sourceFrameInScreen: sourceFrameInScreen)
     }
@@ -54,6 +62,7 @@ public final class SwiftPermisoAssistant {
 
         pendingSourceFrameInScreen = sourceFrameInScreen
         didPresentCurrentOverlay = false
+        overlayController?.close()
         overlayController = OverlayWindowController(hostApp: hostApp, panel: panel) { [weak self] in
             self?.showPreviousPanel(hostApp: hostApp)
         }
