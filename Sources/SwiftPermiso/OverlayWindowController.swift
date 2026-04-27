@@ -3,7 +3,7 @@ import Foundation
 import QuartzCore
 
 final class OverlayWindowController: NSWindowController {
-    private let windowSize = NSSize(width: 530, height: 109)
+    private let windowSize = NSSize(width: 480, height: 88)
     private let launchAnimationDuration: TimeInterval = 0.72
     private let initialAlpha: CGFloat = 0.9
     private var launchTimer: Timer?
@@ -139,11 +139,8 @@ final class OverlayWindowController: NSWindowController {
     }
 
     private func anchoredOrigin(for settingsFrame: CGRect, visibleFrame: CGRect) -> NSPoint {
-        let sidebarWidth: CGFloat = 170
-        let contentMinX = settingsFrame.minX + sidebarWidth
-        let contentWidth = max(settingsFrame.width - sidebarWidth, windowSize.width)
-        let preferredX = contentMinX + ((contentWidth - windowSize.width) / 2) - 8
-        let preferredY = settingsFrame.minY + 34
+        let preferredX = settingsFrame.maxX - windowSize.width - 24
+        let preferredY = settingsFrame.minY + 26
         let minX = visibleFrame.minX + 8
         let maxX = visibleFrame.maxX - windowSize.width - 8
         let minY = visibleFrame.minY + 8
@@ -175,44 +172,23 @@ private final class OverlayContentView: NSView {
     private func setup(hostApp: SwiftPermisoHostApp, panel: SwiftPermisoPanel) {
         let materialView = NSVisualEffectView()
         materialView.translatesAutoresizingMaskIntoConstraints = false
-        materialView.material = .popover
+        materialView.material = .hudWindow
         materialView.blendingMode = .behindWindow
         materialView.state = .active
         materialView.wantsLayer = true
-        materialView.layer?.cornerRadius = 18
+        materialView.layer?.cornerRadius = 16
+        materialView.layer?.cornerCurve = .continuous
         materialView.layer?.masksToBounds = true
         materialView.layer?.borderWidth = 0.5
-        materialView.layer?.borderColor = NSColor.separatorColor.withAlphaComponent(0.18).cgColor
+        materialView.layer?.borderColor = NSColor.separatorColor.withAlphaComponent(0.22).cgColor
         addSubview(materialView)
-
-        let tintView = NSView()
-        tintView.translatesAutoresizingMaskIntoConstraints = false
-        tintView.wantsLayer = true
-        tintView.layer?.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.78).cgColor
-        materialView.addSubview(tintView)
-
-        let backChrome = NSView()
-        backChrome.translatesAutoresizingMaskIntoConstraints = false
-        backChrome.wantsLayer = true
-        backChrome.layer?.backgroundColor = NSColor.controlBackgroundColor.withAlphaComponent(0.95).cgColor
-        backChrome.layer?.cornerRadius = 16
-        materialView.addSubview(backChrome)
-
-        let backButton = NSButton()
-        backButton.translatesAutoresizingMaskIntoConstraints = false
-        backButton.isBordered = false
-        backButton.image = NSImage(systemSymbolName: "chevron.left", accessibilityDescription: "Back")
-        backButton.contentTintColor = NSColor.labelColor.withAlphaComponent(0.72)
-        backButton.target = self
-        backButton.action = #selector(backPressed)
-        (backButton.cell as? NSButtonCell)?.imagePosition = .imageOnly
-        backChrome.addSubview(backButton)
 
         let arrowView = NSImageView()
         arrowView.translatesAutoresizingMaskIntoConstraints = false
-        arrowView.image = NSImage(systemSymbolName: "arrow.up", accessibilityDescription: nil)
-        arrowView.symbolConfiguration = .init(pointSize: 28, weight: .bold)
-        arrowView.contentTintColor = NSColor(calibratedRed: 0.15, green: 0.54, blue: 0.98, alpha: 1)
+        let arrowConfig = NSImage.SymbolConfiguration(pointSize: 13, weight: .bold)
+        arrowView.image = NSImage(systemSymbolName: "arrow.up", accessibilityDescription: nil)?
+            .withSymbolConfiguration(arrowConfig)
+        arrowView.contentTintColor = .systemBlue
         materialView.addSubview(arrowView)
 
         let titleLabel = NSTextField(labelWithAttributedString: title(hostApp: hostApp, panel: panel))
@@ -221,48 +197,58 @@ private final class OverlayContentView: NSView {
         titleLabel.lineBreakMode = .byTruncatingTail
         materialView.addSubview(titleLabel)
 
+        let closeButton = NSButton()
+        closeButton.translatesAutoresizingMaskIntoConstraints = false
+        closeButton.isBordered = false
+        let closeConfig = NSImage.SymbolConfiguration(pointSize: 11, weight: .semibold)
+        closeButton.image = NSImage(systemSymbolName: "xmark", accessibilityDescription: "Dismiss")?
+            .withSymbolConfiguration(closeConfig)
+        closeButton.contentTintColor = NSColor.secondaryLabelColor
+        closeButton.target = self
+        closeButton.action = #selector(backPressed)
+        (closeButton.cell as? NSButtonCell)?.imagePosition = .imageOnly
+        materialView.addSubview(closeButton)
+
         let dragSource = AppDragSourceView(hostApp: hostApp)
         materialView.addSubview(dragSource)
 
         NSLayoutConstraint.activate([
-            widthAnchor.constraint(equalToConstant: 530),
-            heightAnchor.constraint(equalToConstant: 109),
+            widthAnchor.constraint(equalToConstant: 480),
+            heightAnchor.constraint(equalToConstant: 88),
+
             materialView.leadingAnchor.constraint(equalTo: leadingAnchor),
             materialView.trailingAnchor.constraint(equalTo: trailingAnchor),
             materialView.topAnchor.constraint(equalTo: topAnchor),
             materialView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            tintView.leadingAnchor.constraint(equalTo: materialView.leadingAnchor),
-            tintView.trailingAnchor.constraint(equalTo: materialView.trailingAnchor),
-            tintView.topAnchor.constraint(equalTo: materialView.topAnchor),
-            tintView.bottomAnchor.constraint(equalTo: materialView.bottomAnchor),
-            backChrome.leadingAnchor.constraint(equalTo: materialView.leadingAnchor, constant: 18),
-            backChrome.topAnchor.constraint(equalTo: materialView.topAnchor, constant: 52),
-            backChrome.widthAnchor.constraint(equalToConstant: 32),
-            backChrome.heightAnchor.constraint(equalToConstant: 32),
-            backButton.centerXAnchor.constraint(equalTo: backChrome.centerXAnchor),
-            backButton.centerYAnchor.constraint(equalTo: backChrome.centerYAnchor),
-            backButton.widthAnchor.constraint(equalToConstant: 14),
-            backButton.heightAnchor.constraint(equalToConstant: 14),
-            arrowView.leadingAnchor.constraint(equalTo: materialView.leadingAnchor, constant: 64),
-            arrowView.topAnchor.constraint(equalTo: materialView.topAnchor, constant: 4),
-            arrowView.widthAnchor.constraint(equalToConstant: 28),
-            arrowView.heightAnchor.constraint(equalToConstant: 28),
-            titleLabel.leadingAnchor.constraint(equalTo: arrowView.trailingAnchor, constant: 10),
+
+            arrowView.leadingAnchor.constraint(equalTo: materialView.leadingAnchor, constant: 16),
+            arrowView.topAnchor.constraint(equalTo: materialView.topAnchor, constant: 12),
+            arrowView.widthAnchor.constraint(equalToConstant: 14),
+            arrowView.heightAnchor.constraint(equalToConstant: 14),
+
+            titleLabel.leadingAnchor.constraint(equalTo: arrowView.trailingAnchor, constant: 7),
             titleLabel.centerYAnchor.constraint(equalTo: arrowView.centerYAnchor),
-            titleLabel.trailingAnchor.constraint(equalTo: materialView.trailingAnchor, constant: -22),
-            dragSource.leadingAnchor.constraint(equalTo: materialView.leadingAnchor, constant: 64),
-            dragSource.trailingAnchor.constraint(equalTo: materialView.trailingAnchor, constant: -21),
-            dragSource.topAnchor.constraint(equalTo: materialView.topAnchor, constant: 47),
+            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: closeButton.leadingAnchor, constant: -8),
+
+            closeButton.trailingAnchor.constraint(equalTo: materialView.trailingAnchor, constant: -14),
+            closeButton.centerYAnchor.constraint(equalTo: arrowView.centerYAnchor),
+            closeButton.widthAnchor.constraint(equalToConstant: 14),
+            closeButton.heightAnchor.constraint(equalToConstant: 14),
+
+            dragSource.leadingAnchor.constraint(equalTo: materialView.leadingAnchor, constant: 12),
+            dragSource.trailingAnchor.constraint(equalTo: materialView.trailingAnchor, constant: -12),
+            dragSource.bottomAnchor.constraint(equalTo: materialView.bottomAnchor, constant: -8),
             dragSource.heightAnchor.constraint(equalToConstant: 43),
         ])
     }
 
     private func title(hostApp: SwiftPermisoHostApp, panel: SwiftPermisoPanel) -> NSAttributedString {
         NSAttributedString(
-            string: "Drag \(hostApp.displayName) to the list above to allow \(panel.title)",
+            string: "Drag \(hostApp.displayName) above to allow \(panel.title)",
             attributes: [
-                .font: NSFont.systemFont(ofSize: 14, weight: .medium),
-                .foregroundColor: NSColor.labelColor.withAlphaComponent(0.82),
+                .font: NSFont.systemFont(ofSize: 13, weight: .medium),
+                .foregroundColor: NSColor.labelColor.withAlphaComponent(0.92),
+                .kern: -0.05,
             ]
         )
     }

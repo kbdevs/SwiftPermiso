@@ -6,9 +6,11 @@ let package = Package(
     platforms: [.macOS(.v13)],
     products: [
         .library(name: "SwiftPermiso", targets: ["SwiftPermiso"]),
+        .executable(name: "SwiftPermisoPreview", targets: ["SwiftPermisoPreview"]),
     ],
     targets: [
         .target(name: "SwiftPermiso"),
+        .executableTarget(name: "SwiftPermisoPreview", dependencies: ["SwiftPermiso"]),
         .testTarget(name: "SwiftPermisoTests", dependencies: ["SwiftPermiso"]),
     ]
 )
