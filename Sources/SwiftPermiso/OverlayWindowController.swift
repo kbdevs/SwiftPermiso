@@ -243,7 +243,7 @@ private final class OverlayContentView: NSView {
             backButton.centerYAnchor.constraint(equalTo: backChrome.centerYAnchor),
             backButton.widthAnchor.constraint(equalToConstant: 14),
             backButton.heightAnchor.constraint(equalToConstant: 14),
-            arrowView.leadingAnchor.constraint(equalTo: materialView.leadingAnchor, constant: 164),
+            arrowView.leadingAnchor.constraint(equalTo: materialView.leadingAnchor, constant: 126),
             arrowView.topAnchor.constraint(equalTo: materialView.topAnchor, constant: 4),
             arrowView.widthAnchor.constraint(equalToConstant: 28),
             arrowView.heightAnchor.constraint(equalToConstant: 28),
