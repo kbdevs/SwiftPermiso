@@ -143,7 +143,7 @@ final class OverlayWindowController: NSWindowController {
         let contentMinX = settingsFrame.minX + sidebarWidth
         let contentWidth = max(settingsFrame.width - sidebarWidth, windowSize.width)
         let preferredX = contentMinX + ((contentWidth - windowSize.width) / 2) - 8
-        let preferredY = settingsFrame.minY + 48
+        let preferredY = settingsFrame.minY + 34
         let minX = visibleFrame.minX + 8
         let maxX = visibleFrame.maxX - windowSize.width - 8
         let minY = visibleFrame.minY + 8
@@ -243,7 +243,7 @@ private final class OverlayContentView: NSView {
             backButton.centerYAnchor.constraint(equalTo: backChrome.centerYAnchor),
             backButton.widthAnchor.constraint(equalToConstant: 14),
             backButton.heightAnchor.constraint(equalToConstant: 14),
-            arrowView.leadingAnchor.constraint(equalTo: materialView.leadingAnchor, constant: 84),
+            arrowView.leadingAnchor.constraint(equalTo: materialView.leadingAnchor, constant: 64),
             arrowView.topAnchor.constraint(equalTo: materialView.topAnchor, constant: 4),
             arrowView.widthAnchor.constraint(equalToConstant: 28),
             arrowView.heightAnchor.constraint(equalToConstant: 28),
